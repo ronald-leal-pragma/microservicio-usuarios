@@ -1,0 +1,37 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# IDE - IntelliJ / JetBrains
+.idea/
+*.iml
+
+# Eclipse/STS output folder present in this repo
+bin/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local env/config
+.env
+.env.*
+application-local.yml
+src/main/resources/application-local.yml
+src/test/resources/application-local.yml
+
+# Keep Gradle wrapper tracked
+!gradle/wrapper/gradle-wrapper.jar
+

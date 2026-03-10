@@ -29,8 +29,10 @@ public class SecurityConfig {
             // Login y Swagger son públicos
             .antMatchers(HttpMethod.POST, "/auth/login").permitAll()
             .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            // Crear propietario requiere token de ADMINISTRADOR (enviado desde plazoleta o directamente)
+            // Crear propietario: público (llamado desde plazoleta o directamente)
             .antMatchers(HttpMethod.POST, "/user/").permitAll()
+            // Obtener usuario por ID: interno para integración entre microservicios
+            .antMatchers(HttpMethod.GET, "/user/**").permitAll()
             .anyRequest().authenticated();
 
         return http.build();

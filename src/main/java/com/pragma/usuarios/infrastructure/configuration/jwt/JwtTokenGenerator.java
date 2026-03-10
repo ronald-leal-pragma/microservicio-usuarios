@@ -32,20 +32,27 @@ public class JwtTokenGenerator implements ITokenGeneratorPort {
 
     @Override
     public String generateToken(UserModel userModel) {
+        log.info("[JWT GENERATOR] Generando token para correo={}, rol={}",
+                userModel.getCorreo(), userModel.getRol().getNombre());
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", userModel.getId());
         claims.put("rol", userModel.getRol().getNombre());
 
+        Date issuedAt = new Date();
+        Date expiration = new Date(System.currentTimeMillis() + expirationMs);
+        log.debug("[JWT GENERATOR] Claims: id={}, rol={}, expiresAt={}",
+                userModel.getId(), userModel.getRol().getNombre(), expiration);
+
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userModel.getCorreo())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiration)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
 
-        log.debug("[JWT GENERATOR] Token generado para correo={}, rol={}",
-                userModel.getCorreo(), userModel.getRol().getNombre());
+        log.info("[JWT GENERATOR] Token generado exitosamente para correo={}", userModel.getCorreo());
         return token;
     }
 }

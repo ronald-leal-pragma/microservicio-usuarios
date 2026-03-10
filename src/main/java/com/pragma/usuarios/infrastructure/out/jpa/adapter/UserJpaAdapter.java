@@ -58,4 +58,11 @@ public class UserJpaAdapter implements IUserPersistencePort {
         return userRepository.findByCorreo(correo)
                 .map(userEntityMapper::toModel);
     }
+
+    @Override
+    public Optional<UserModel> findById(Long id) {
+        log.debug("[JPA ADAPTER] Buscando usuario con id={}", id);
+        return userRepository.findById(id)
+                .map(userEntityMapper::toModel);
+    }
 }
