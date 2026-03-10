@@ -22,7 +22,7 @@ public class UserJpaAdapter implements IUserPersistencePort {
     private final IUserEntityMapper userEntityMapper;
 
     @Override
-    public void saveUser(UserModel userModel) {
+    public UserModel saveUser(UserModel userModel) {
         log.info("[JPA ADAPTER] Verificando duplicados para correo={} y documento={}",
                 userModel.getCorreo(), userModel.getDocumentoDeIdentidad());
 
@@ -48,9 +48,10 @@ public class UserJpaAdapter implements IUserPersistencePort {
 
         UserEntity userEntity = userEntityMapper.toEntity(userModel);
         userEntity.setRol(rolEntity);
-        userRepository.save(userEntity);
+        UserEntity saved = userRepository.save(userEntity);
         log.info("[JPA ADAPTER] Usuario guardado exitosamente con correo={}", userModel.getCorreo());
-    }
+        return userEntityMapper.toModel(saved);
+}
 
     @Override
     public Optional<UserModel> findByCorreo(String correo) {

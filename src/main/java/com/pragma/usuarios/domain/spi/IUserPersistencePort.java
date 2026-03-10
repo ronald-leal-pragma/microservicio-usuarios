@@ -5,7 +5,7 @@ import com.pragma.usuarios.domain.model.UserModel;
 import java.util.Optional;
 
 public interface IUserPersistencePort {
-    void saveUser(UserModel userModel);
+    UserModel saveUser(UserModel userModel);
     Optional<UserModel> findByCorreo(String correo);
     Optional<UserModel> findById(Long id);
 }

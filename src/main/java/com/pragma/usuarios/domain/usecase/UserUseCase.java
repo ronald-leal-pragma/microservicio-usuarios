@@ -27,7 +27,7 @@ public class UserUseCase implements IUserServicePort {
     }
 
     @Override
-    public void savePropietario(UserModel userModel) {
+    public UserModel savePropietario(UserModel userModel) {
         log.info("[USE CASE] Validando edad del propietario: fechaNacimiento={}", userModel.getFechaNacimiento());
         validateAge(userModel.getFechaNacimiento());
         log.info("[USE CASE] Validación de edad OK");
@@ -43,8 +43,8 @@ public class UserUseCase implements IUserServicePort {
         ));
 
         log.info("[USE CASE] Persistiendo propietario: correo={}", userModel.getCorreo());
-        userPersistencePort.saveUser(userModel);
-    }
+        return userPersistencePort.saveUser(userModel);
+}
 
     private void validateAge(LocalDate fechaNacimiento) {
         int age = Period.between(fechaNacimiento, LocalDate.now()).getYears();

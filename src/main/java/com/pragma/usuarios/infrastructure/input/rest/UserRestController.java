@@ -1,6 +1,7 @@
 package com.pragma.usuarios.infrastructure.input.rest;
 
 import com.pragma.usuarios.application.dto.request.UserRequestDto;
+import com.pragma.usuarios.application.dto.response.UserCreatedResponseDto;
 import com.pragma.usuarios.application.dto.response.UserResponseDto;
 import com.pragma.usuarios.application.handler.IUserHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,16 +30,17 @@ public class UserRestController {
     @Operation(summary = "Crear propietario",
                description = "Crea un nuevo usuario con rol de propietario. Solo puede ser invocado por un ADMINISTRADOR.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Propietario creado exitosamente"),
+            @ApiResponse(responseCode = "201", description = "Propietario creado exitosamente",
+                         content = @Content(schema = @Schema(implementation = UserCreatedResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos", content = @Content),
             @ApiResponse(responseCode = "409", description = "El usuario ya existe", content = @Content)
     })
     @PostMapping("/")
-    public ResponseEntity<Void> savePropietario(@Valid @RequestBody UserRequestDto userRequestDto) {
+    public ResponseEntity<UserCreatedResponseDto> savePropietario(@Valid @RequestBody UserRequestDto userRequestDto) {
         log.info("[REST] POST /user/ - Crear propietario: correo={}", userRequestDto.getCorreo());
-        userHandler.savePropietario(userRequestDto);
+        UserCreatedResponseDto created = userHandler.savePropietario(userRequestDto);
         log.info("[REST] Propietario creado exitosamente: correo={}", userRequestDto.getCorreo());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @Operation(summary = "Obtener usuario por ID",

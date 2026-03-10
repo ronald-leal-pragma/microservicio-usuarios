@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Getter
@@ -21,4 +22,5 @@ public class UserModel {
     private String correo;
     private String clave;
     private RolModel rol;
+    private Instant creadoEn;
 }

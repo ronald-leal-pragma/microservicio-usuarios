@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
@@ -44,4 +47,8 @@ public class UserEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_rol", nullable = false)
     private RolEntity rol;
+
+    @CreationTimestamp
+    @Column(name = "creado_en", nullable = false, updatable = false)
+    private Instant creadoEn;
 }

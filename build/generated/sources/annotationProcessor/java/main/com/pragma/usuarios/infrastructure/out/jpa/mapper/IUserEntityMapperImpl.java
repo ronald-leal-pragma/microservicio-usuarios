@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-09T17:31:25-0500",
+    date = "2026-03-10T17:37:56-0500",
     comments = "version: 1.5.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.8.jar, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
@@ -32,6 +32,7 @@ public class IUserEntityMapperImpl implements IUserEntityMapper {
         userEntity.setFechaNacimiento( userModel.getFechaNacimiento() );
         userEntity.setCorreo( userModel.getCorreo() );
         userEntity.setClave( userModel.getClave() );
+        userEntity.setCreadoEn( userModel.getCreadoEn() );
 
         return userEntity;
     }
@@ -53,6 +54,7 @@ public class IUserEntityMapperImpl implements IUserEntityMapper {
         userModel.setFechaNacimiento( userEntity.getFechaNacimiento() );
         userModel.setCorreo( userEntity.getCorreo() );
         userModel.setClave( userEntity.getClave() );
+        userModel.setCreadoEn( userEntity.getCreadoEn() );
 
         return userModel;
     }

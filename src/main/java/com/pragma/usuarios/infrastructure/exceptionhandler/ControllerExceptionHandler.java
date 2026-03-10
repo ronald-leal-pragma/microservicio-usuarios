@@ -7,73 +7,124 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
 public class ControllerExceptionHandler {
 
-    private static final String MESSAGE = "message";
-
     @ExceptionHandler(NoDataFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNoDataFoundException(NoDataFoundException ex) {
-        log.warn("[EXCEPTION] 404 - Recurso no encontrado");
+    public ResponseEntity<ErrorResponseDto> handleNoDataFoundException(
+            NoDataFoundException ex, HttpServletRequest request) {
+        log.warn("[EXCEPTION] 404 - Recurso no encontrado: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.NO_DATA_FOUND.getMessage()));
+                .body(ErrorResponseDto.builder()
+                        .status(404)
+                        .error("Not Found")
+                        .message(ex.getMessage())
+                        .timestamp(Instant.now().toString())
+                        .path(request.getRequestURI())
+                        .build());
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<Map<String, String>> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponseDto> handleUserAlreadyExistsException(
+            UserAlreadyExistsException ex, HttpServletRequest request) {
         log.warn("[EXCEPTION] 409 - Usuario ya existe");
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.USER_ALREADY_EXISTS.getMessage()));
+                .body(ErrorResponseDto.builder()
+                        .status(409)
+                        .error("Conflict")
+                        .message(ExceptionResponse.USER_ALREADY_EXISTS.getMessage())
+                        .code("USER_ALREADY_EXISTS")
+                        .build());
     }
 
     @ExceptionHandler(DomainException.class)
-    public ResponseEntity<Map<String, String>> handleDomainException(DomainException ex) {
+    public ResponseEntity<ErrorResponseDto> handleDomainException(
+            DomainException ex, HttpServletRequest request) {
         log.warn("[EXCEPTION] 400 - Validación de dominio: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, ex.getMessage()));
+                .body(ErrorResponseDto.builder()
+                        .status(400)
+                        .error("Bad Request")
+                        .message(ex.getMessage())
+                        .code("VALIDATION_ERROR")
+                        .build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String field = ((FieldError) error).getField();
-            errors.put(field, error.getDefaultMessage());
-        });
-        log.warn("[EXCEPTION] 400 - Validación de campos: {}", errors);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        String combinedMessage = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> {
+                    String field = ((FieldError) error).getField();
+                    return "El campo '" + field + "': " + error.getDefaultMessage();
+                })
+                .collect(Collectors.joining("; "));
+        log.warn("[EXCEPTION] 400 - Validación de campos: {}", combinedMessage);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponseDto.builder()
+                        .status(400)
+                        .error("Bad Request")
+                        .message("Validación fallida: " + combinedMessage)
+                        .code("VALIDATION_ERROR")
+                        .build());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadableException(
-            HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
         log.warn("[EXCEPTION] 400 - JSON no legible: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, "El formato del cuerpo de la petición es inválido"));
+                .body(ErrorResponseDto.builder()
+                        .status(400)
+                        .error("Bad Request")
+                        .message("El formato del cuerpo de la petición es inválido")
+                        .code("VALIDATION_ERROR")
+                        .build());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentTypeMismatchException(
-            MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<ErrorResponseDto> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
         log.warn("[EXCEPTION] 400 - Tipo de argumento inválido: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE, "Tipo de parámetro inválido: " + ex.getName()));
+                .body(ErrorResponseDto.builder()
+                        .status(400)
+                        .error("Bad Request")
+                        .message("Tipo de parámetro inválido: " + ex.getName())
+                        .code("VALIDATION_ERROR")
+                        .build());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
+            AccessDeniedException ex, HttpServletRequest request) {
+        log.warn("[EXCEPTION] 403 - Acceso denegado: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponseDto.builder()
+                        .status(403)
+                        .error("Forbidden")
+                        .message("No tienes permisos suficientes para acceder a este recurso.")
+                        .code("PERMISSION_DENIED")
+                        .details("El recurso solicitado requiere permisos adicionales.")
+                        .build());
     }
 }

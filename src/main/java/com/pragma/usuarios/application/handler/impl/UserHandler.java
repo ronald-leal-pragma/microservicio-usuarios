@@ -1,6 +1,7 @@
 package com.pragma.usuarios.application.handler.impl;
 
 import com.pragma.usuarios.application.dto.request.UserRequestDto;
+import com.pragma.usuarios.application.dto.response.UserCreatedResponseDto;
 import com.pragma.usuarios.application.dto.response.UserResponseDto;
 import com.pragma.usuarios.application.handler.IUserHandler;
 import com.pragma.usuarios.application.mapper.IUserRequestMapper;
@@ -24,11 +25,17 @@ public class UserHandler implements IUserHandler {
     private final IUserPersistencePort userPersistencePort;
 
     @Override
-    public void savePropietario(UserRequestDto userRequestDto) {
+    public UserCreatedResponseDto savePropietario(UserRequestDto userRequestDto) {
         log.info("[HANDLER] Iniciando proceso de creación de propietario: correo={}", userRequestDto.getCorreo());
         UserModel userModel = userRequestMapper.toUser(userRequestDto);
-        userServicePort.savePropietario(userModel);
+        UserModel saved = userServicePort.savePropietario(userModel);
         log.info("[HANDLER] Proceso finalizado correctamente para correo: {}", userRequestDto.getCorreo());
+        UserCreatedResponseDto dto = new UserCreatedResponseDto();
+        dto.setId(saved.getId());
+        dto.setNombre(saved.getNombre());
+        dto.setCorreo(saved.getCorreo());
+        dto.setCreadoEn(saved.getCreadoEn() != null ? saved.getCreadoEn().toString() : null);
+        return dto;
     }
 
     @Override
@@ -37,7 +44,7 @@ public class UserHandler implements IUserHandler {
         UserModel userModel = userPersistencePort.findById(id)
                 .orElseThrow(() -> {
                     log.warn("[HANDLER] Usuario no encontrado: id={}", id);
-                    return new NoDataFoundException();
+                    return new NoDataFoundException("No se encontró el recurso solicitado (usuario con ID " + id + ")");
                 });
         log.info("[HANDLER] Usuario encontrado: id={}, correo={}, rol={}",
                 userModel.getId(), userModel.getCorreo(),
@@ -45,9 +52,9 @@ public class UserHandler implements IUserHandler {
         UserResponseDto dto = new UserResponseDto();
         dto.setId(userModel.getId());
         dto.setNombre(userModel.getNombre());
-        dto.setApellido(userModel.getApellido());
         dto.setCorreo(userModel.getCorreo());
         dto.setRol(userModel.getRol() != null ? userModel.getRol().getNombre() : null);
+        dto.setFechaCreacion(userModel.getCreadoEn() != null ? userModel.getCreadoEn().toString() : null);
         return dto;
     }
 }

@@ -10,12 +10,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseDto {
+public class UserCreatedResponseDto {
     private Long id;
     private String nombre;
     @JsonProperty("email")
     private String correo;
-    private String rol;
-    @JsonProperty("fecha_creacion")
-    private String fechaCreacion;
+    @JsonProperty("creadoEn")
+    private String creadoEn;
 }
