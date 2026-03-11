@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,34 +29,41 @@ public class UserHandler implements IUserHandler {
     @Override
     public UserCreatedResponseDto savePropietario(UserRequestDto userRequestDto) {
         log.info("[HANDLER] Iniciando proceso de creación de propietario: correo={}", userRequestDto.getCorreo());
+
         UserModel userModel = userRequestMapper.toUser(userRequestDto);
         UserModel saved = userServicePort.savePropietario(userModel);
+
         log.info("[HANDLER] Proceso finalizado correctamente para correo: {}", userRequestDto.getCorreo());
-        UserCreatedResponseDto dto = new UserCreatedResponseDto();
-        dto.setId(saved.getId());
-        dto.setNombre(saved.getNombre());
-        dto.setCorreo(saved.getCorreo());
-        dto.setCreadoEn(saved.getCreadoEn() != null ? saved.getCreadoEn().toString() : null);
-        return dto;
+
+        return UserCreatedResponseDto.builder()
+                .id(saved.getId())
+                .nombre(saved.getNombre())
+                .correo(saved.getCorreo())
+                .creadoEn(Optional.ofNullable(saved.getCreadoEn()).map(Object::toString).orElse(null))
+                .build();
     }
 
     @Override
     public UserResponseDto getUserById(Long id) {
         log.info("[HANDLER] Buscando usuario por id={}", id);
+
         UserModel userModel = userPersistencePort.findById(id)
                 .orElseThrow(() -> {
                     log.warn("[HANDLER] Usuario no encontrado: id={}", id);
                     return new NoDataFoundException("No se encontró el recurso solicitado (usuario con ID " + id + ")");
                 });
+
         log.info("[HANDLER] Usuario encontrado: id={}, correo={}, rol={}",
                 userModel.getId(), userModel.getCorreo(),
-                userModel.getRol() != null ? userModel.getRol().getNombre() : "sin rol");
-        UserResponseDto dto = new UserResponseDto();
-        dto.setId(userModel.getId());
-        dto.setNombre(userModel.getNombre());
-        dto.setCorreo(userModel.getCorreo());
-        dto.setRol(userModel.getRol() != null ? userModel.getRol().getNombre() : null);
-        dto.setFechaCreacion(userModel.getCreadoEn() != null ? userModel.getCreadoEn().toString() : null);
-        return dto;
+                Optional.ofNullable(userModel.getRol()).map(r -> r.getNombre()).orElse("sin rol"));
+
+        // Uso de Builder para construir la respuesta
+        return UserResponseDto.builder()
+                .id(userModel.getId())
+                .nombre(userModel.getNombre())
+                .correo(userModel.getCorreo())
+                .rol(Optional.ofNullable(userModel.getRol()).map(r -> r.getNombre()).orElse(null))
+                .fechaCreacion(Optional.ofNullable(userModel.getCreadoEn()).map(Object::toString).orElse(null))
+                .build();
     }
 }

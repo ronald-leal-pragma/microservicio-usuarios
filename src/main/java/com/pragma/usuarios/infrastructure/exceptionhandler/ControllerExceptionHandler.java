@@ -22,6 +22,29 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ControllerExceptionHandler {
 
+    // --- CONSTANTES DE DESCRIPCIÓN HTTP ---
+    private static final String ERROR_NOT_FOUND = "Not Found";
+    private static final String ERROR_CONFLICT = "Conflict";
+    private static final String ERROR_BAD_REQUEST = "Bad Request";
+    private static final String ERROR_FORBIDDEN = "Forbidden";
+
+    // --- CONSTANTES DE CÓDIGOS DE ERROR ---
+    private static final String CODE_USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS";
+    private static final String CODE_VALIDATION_ERROR = "VALIDATION_ERROR";
+    private static final String CODE_PERMISSION_DENIED = "PERMISSION_DENIED";
+
+    // --- CONSTANTES DE MENSAJES PERSONALIZADOS ---
+    private static final String MSG_INVALID_JSON = "El formato del cuerpo de la petición es inválido";
+    private static final String MSG_INVALID_PARAM_TYPE = "Tipo de parámetro inválido: ";
+    private static final String MSG_VALIDATION_FAILED = "Validación fallida: ";
+    private static final String MSG_ACCESS_DENIED = "No tienes permisos suficientes para acceder a este recurso.";
+    private static final String DETAILS_ACCESS_DENIED = "El recurso solicitado requiere permisos adicionales.";
+
+    // --- CONSTANTES DE FORMATO PARA VALIDACIONES ---
+    private static final String FIELD_PREFIX = "El campo '";
+    private static final String FIELD_SUFFIX = "': ";
+    private static final String FIELD_SEPARATOR = "; ";
+
     @ExceptionHandler(NoDataFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleNoDataFoundException(
             NoDataFoundException ex, HttpServletRequest request) {
@@ -29,8 +52,8 @@ public class ControllerExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponseDto.builder()
-                        .status(404)
-                        .error("Not Found")
+                        .status(HttpStatus.NOT_FOUND.value())
+                        .error(ERROR_NOT_FOUND)
                         .message(ex.getMessage())
                         .timestamp(Instant.now().toString())
                         .path(request.getRequestURI())
@@ -44,10 +67,10 @@ public class ControllerExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(ErrorResponseDto.builder()
-                        .status(409)
-                        .error("Conflict")
+                        .status(HttpStatus.CONFLICT.value())
+                        .error(ERROR_CONFLICT)
                         .message(ExceptionResponse.USER_ALREADY_EXISTS.getMessage())
-                        .code("USER_ALREADY_EXISTS")
+                        .code(CODE_USER_ALREADY_EXISTS)
                         .build());
     }
 
@@ -58,30 +81,33 @@ public class ControllerExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponseDto.builder()
-                        .status(400)
-                        .error("Bad Request")
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error(ERROR_BAD_REQUEST)
                         .message(ex.getMessage())
-                        .code("VALIDATION_ERROR")
+                        .code(CODE_VALIDATION_ERROR)
                         .build());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
+
         String combinedMessage = ex.getBindingResult().getAllErrors().stream()
                 .map(error -> {
                     String field = ((FieldError) error).getField();
-                    return "El campo '" + field + "': " + error.getDefaultMessage();
+                    return FIELD_PREFIX + field + FIELD_SUFFIX + error.getDefaultMessage();
                 })
-                .collect(Collectors.joining("; "));
+                .collect(Collectors.joining(FIELD_SEPARATOR));
+
         log.warn("[EXCEPTION] 400 - Validación de campos: {}", combinedMessage);
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponseDto.builder()
-                        .status(400)
-                        .error("Bad Request")
-                        .message("Validación fallida: " + combinedMessage)
-                        .code("VALIDATION_ERROR")
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error(ERROR_BAD_REQUEST)
+                        .message(MSG_VALIDATION_FAILED + combinedMessage)
+                        .code(CODE_VALIDATION_ERROR)
                         .build());
     }
 
@@ -92,10 +118,10 @@ public class ControllerExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponseDto.builder()
-                        .status(400)
-                        .error("Bad Request")
-                        .message("El formato del cuerpo de la petición es inválido")
-                        .code("VALIDATION_ERROR")
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error(ERROR_BAD_REQUEST)
+                        .message(MSG_INVALID_JSON)
+                        .code(CODE_VALIDATION_ERROR)
                         .build());
     }
 
@@ -106,10 +132,10 @@ public class ControllerExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponseDto.builder()
-                        .status(400)
-                        .error("Bad Request")
-                        .message("Tipo de parámetro inválido: " + ex.getName())
-                        .code("VALIDATION_ERROR")
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error(ERROR_BAD_REQUEST)
+                        .message(MSG_INVALID_PARAM_TYPE + ex.getName())
+                        .code(CODE_VALIDATION_ERROR)
                         .build());
     }
 
@@ -120,11 +146,11 @@ public class ControllerExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ErrorResponseDto.builder()
-                        .status(403)
-                        .error("Forbidden")
-                        .message("No tienes permisos suficientes para acceder a este recurso.")
-                        .code("PERMISSION_DENIED")
-                        .details("El recurso solicitado requiere permisos adicionales.")
+                        .status(HttpStatus.FORBIDDEN.value())
+                        .error(ERROR_FORBIDDEN)
+                        .message(MSG_ACCESS_DENIED)
+                        .code(CODE_PERMISSION_DENIED)
+                        .details(DETAILS_ACCESS_DENIED)
                         .build());
     }
 }

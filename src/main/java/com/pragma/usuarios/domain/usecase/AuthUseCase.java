@@ -7,9 +7,11 @@ import com.pragma.usuarios.domain.model.UserModel;
 import com.pragma.usuarios.domain.spi.IPasswordEncoderPort;
 import com.pragma.usuarios.domain.spi.ITokenGeneratorPort;
 import com.pragma.usuarios.domain.spi.IUserPersistencePort;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RequiredArgsConstructor
 public class AuthUseCase implements IAuthServicePort {
 
     private static final Logger log = LoggerFactory.getLogger(AuthUseCase.class);
@@ -17,14 +19,6 @@ public class AuthUseCase implements IAuthServicePort {
     private final IUserPersistencePort userPersistencePort;
     private final IPasswordEncoderPort passwordEncoderPort;
     private final ITokenGeneratorPort tokenGeneratorPort;
-
-    public AuthUseCase(IUserPersistencePort userPersistencePort,
-                       IPasswordEncoderPort passwordEncoderPort,
-                       ITokenGeneratorPort tokenGeneratorPort) {
-        this.userPersistencePort = userPersistencePort;
-        this.passwordEncoderPort = passwordEncoderPort;
-        this.tokenGeneratorPort = tokenGeneratorPort;
-    }
 
     @Override
     public String login(String correo, String clave) {

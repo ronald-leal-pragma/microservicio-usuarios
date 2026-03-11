@@ -15,4 +15,7 @@ public class ExceptionConstants {
 
     public static final String ROL_CLIENTE = "CLIENTE";
     public static final Long ROL_CLIENTE_ID = 3L;
+
+    public static final String USER_EMAIL_ALREADY_EXISTS_MESSAGE = "Ya existe un usuario registrado con este correo";
+    public static final String USER_DOCUMENT_ALREADY_EXISTS_MESSAGE = "Ya existe un usuario registrado con este documento de identidad";
 }
