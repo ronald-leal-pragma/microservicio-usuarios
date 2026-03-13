@@ -11,8 +11,10 @@ import lombok.*;
 public class UserCreatedResponseDto {
     private Long id;
     private String nombre;
+    private String apellido;
     @JsonProperty("email")
     private String correo;
+    private String rol;
     @JsonProperty("creadoEn")
     private String creadoEn;
 }

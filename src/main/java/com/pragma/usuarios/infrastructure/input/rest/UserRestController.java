@@ -1,5 +1,7 @@
 package com.pragma.usuarios.infrastructure.input.rest;
 
+import com.pragma.usuarios.application.dto.request.ClientRequestDto;
+import com.pragma.usuarios.application.dto.request.EmployeeRequestDto;
 import com.pragma.usuarios.application.dto.request.UserRequestDto;
 import com.pragma.usuarios.application.dto.response.UserCreatedResponseDto;
 import com.pragma.usuarios.application.dto.response.UserResponseDto;
@@ -40,6 +42,38 @@ public class UserRestController {
         log.info("[REST] POST /user/ - Crear propietario: correo={}", userRequestDto.getCorreo());
         UserCreatedResponseDto created = userHandler.savePropietario(userRequestDto);
         log.info("[REST] Propietario creado exitosamente: correo={}", userRequestDto.getCorreo());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @Operation(summary = "Crear empleado",
+               description = "Crea un nuevo usuario con rol de empleado. Llamado desde microservicio-plazoleta por un PROPIETARIO.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Empleado creado exitosamente",
+                         content = @Content(schema = @Schema(implementation = UserCreatedResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos", content = @Content),
+            @ApiResponse(responseCode = "409", description = "El usuario ya existe", content = @Content)
+    })
+    @PostMapping("/employee/")
+    public ResponseEntity<UserCreatedResponseDto> saveEmployee(@Valid @RequestBody EmployeeRequestDto employeeRequestDto) {
+        log.info("[REST] POST /user/employee/ - Crear empleado: correo={}", employeeRequestDto.getCorreo());
+        UserCreatedResponseDto created = userHandler.saveEmployee(employeeRequestDto);
+        log.info("[REST] Empleado creado exitosamente: correo={}", employeeRequestDto.getCorreo());
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @Operation(summary = "Crear cliente",
+               description = "Crea un nuevo usuario con rol de cliente. Endpoint público para auto-registro.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Cliente creado exitosamente",
+                         content = @Content(schema = @Schema(implementation = UserCreatedResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos", content = @Content),
+            @ApiResponse(responseCode = "409", description = "El usuario ya existe", content = @Content)
+    })
+    @PostMapping("/client/")
+    public ResponseEntity<UserCreatedResponseDto> saveClient(@Valid @RequestBody ClientRequestDto clientRequestDto) {
+        log.info("[REST] POST /user/client/ - Crear cliente: correo={}", clientRequestDto.getCorreo());
+        UserCreatedResponseDto created = userHandler.saveClient(clientRequestDto);
+        log.info("[REST] Cliente creado exitosamente: correo={}", clientRequestDto.getCorreo());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 

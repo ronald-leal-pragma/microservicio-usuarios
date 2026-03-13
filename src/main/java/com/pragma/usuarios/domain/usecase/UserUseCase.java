@@ -19,7 +19,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserUseCase implements IUserServicePort {
     private static final int MINIMUM_LEGAL_AGE = 18;
+    private static final int DEFAULT_EMPLOYEE_AGE = 25;
     private static final String PROPIETARIO_ROLE_DESC = "Rol de propietario de restaurante";
+    private static final String EMPLEADO_ROLE_DESC = "Rol de empleado de restaurante";
+    private static final String CLIENTE_ROLE_DESC = "Rol de cliente de plazoleta";
 
     private final IUserPersistencePort userPersistencePort;
     private final IPasswordEncoderPort passwordEncoderPort;
@@ -27,34 +30,80 @@ public class UserUseCase implements IUserServicePort {
 
     @Override
     public UserModel savePropietario(UserModel userModel) {
-        log.info("[USE CASE] Iniciando validaciones para crear propietario: correo={}", userModel.getCorreo());
-
         validateAge(userModel.getFechaNacimiento());
+        return processAndSaveUser(
+                userModel,
+                "propietario",
+                ExceptionConstants.ROL_PROPIETARIO,
+                PROPIETARIO_ROLE_DESC
+        );
+    }
+
+    @Override
+    public UserModel saveEmployee(UserModel userModel) {
+        ensureDefaultBirthDate(userModel);
+        return processAndSaveUser(
+                userModel,
+                "empleado",
+                ExceptionConstants.ROL_EMPLEADO,
+                EMPLEADO_ROLE_DESC
+        );
+    }
+
+    @Override
+    public UserModel saveClient(UserModel userModel) {
+        ensureDefaultBirthDate(userModel);
+        return processAndSaveUser(
+                userModel,
+                "cliente",
+                ExceptionConstants.ROL_CLIENTE,
+                CLIENTE_ROLE_DESC
+        );
+    }
+
+    private UserModel processAndSaveUser(UserModel userModel, String userType, String roleName, String roleDesc) {
+        log.info("[USE CASE] Iniciando validaciones para crear {}: correo={}", userType, userModel.getCorreo());
+
         validateUserUniqueness(userModel.getCorreo(), userModel.getDocumentoDeIdentidad());
 
         log.debug("[USE CASE] Encriptando contraseña");
         userModel.setClave(passwordEncoderPort.encode(userModel.getClave()));
 
-        log.info("[USE CASE] Asignando rol: {}", ExceptionConstants.ROL_PROPIETARIO);
-        userModel.setRol(getOrCreateRol());
+        log.info("[USE CASE] Asignando rol: {}", roleName);
+        userModel.setRol(getOrCreateRol(roleName, roleDesc));
 
-        log.info("[USE CASE] Todas las validaciones OK, persistiendo propietario");
+        log.info("[USE CASE] Todas las validaciones OK, persistiendo {}", userType);
         return userPersistencePort.saveUser(userModel);
     }
 
-    private RolModel getOrCreateRol() {
-        log.debug("[USE CASE] Buscando rol por nombre: {}", ExceptionConstants.ROL_PROPIETARIO);
+    private void ensureDefaultBirthDate(UserModel userModel) {
+        if (userModel.getFechaNacimiento() == null) {
+            log.debug("[USE CASE] Fecha de nacimiento no proporcionada, asignando fecha por defecto");
+            userModel.setFechaNacimiento(LocalDate.now().minusYears(DEFAULT_EMPLOYEE_AGE));
+        }
+    }
 
-        return rolPersistencePort.findByName(ExceptionConstants.ROL_PROPIETARIO)
+    private RolModel getOrCreateRol(String rolName, String rolDescription) {
+        log.debug("[USE CASE] Buscando rol por nombre: {}", rolName);
+
+        return rolPersistencePort.findByName(rolName)
                 .orElseGet(() -> {
-                    log.info("[USE CASE] Rol no encontrado, procediendo a crearlo: {}", ExceptionConstants.ROL_PROPIETARIO);
-                    RolModel newRol = new RolModel(
-                            null,
-                            ExceptionConstants.ROL_PROPIETARIO,
-                            UserUseCase.PROPIETARIO_ROLE_DESC
-                    );
+                    log.info("[USE CASE] Rol no encontrado, procediendo a crearlo: {}", rolName);
+                    Long rolId = getRolIdByName(rolName);
+                    RolModel newRol = new RolModel(rolId, rolName, rolDescription);
                     return rolPersistencePort.save(newRol);
                 });
+    }
+
+    private Long getRolIdByName(String rolName) {
+        if (ExceptionConstants.ROL_PROPIETARIO.equals(rolName)) {
+            return ExceptionConstants.ROL_PROPIETARIO_ID;
+        } else if (ExceptionConstants.ROL_EMPLEADO.equals(rolName)) {
+            return ExceptionConstants.ROL_EMPLEADO_ID;
+        } else if (ExceptionConstants.ROL_CLIENTE.equals(rolName)) {
+            return ExceptionConstants.ROL_CLIENTE_ID;
+        }
+        throw new DomainException("Rol desconocido: " + rolName);
     }
 
     private void validateAge(LocalDate fechaNacimiento) {

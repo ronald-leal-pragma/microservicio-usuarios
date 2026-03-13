@@ -1,11 +1,14 @@
 package com.pragma.usuarios.application.handler.impl;
 
+import com.pragma.usuarios.application.dto.request.ClientRequestDto;
+import com.pragma.usuarios.application.dto.request.EmployeeRequestDto;
 import com.pragma.usuarios.application.dto.request.UserRequestDto;
 import com.pragma.usuarios.application.dto.response.UserCreatedResponseDto;
 import com.pragma.usuarios.application.dto.response.UserResponseDto;
 import com.pragma.usuarios.application.handler.IUserHandler;
 import com.pragma.usuarios.application.mapper.IUserRequestMapper;
 import com.pragma.usuarios.domain.api.IUserServicePort;
+import com.pragma.usuarios.domain.model.RolModel;
 import com.pragma.usuarios.domain.model.UserModel;
 import com.pragma.usuarios.domain.spi.IUserPersistencePort;
 import com.pragma.usuarios.infrastructure.exception.NoDataFoundException;
@@ -38,7 +41,47 @@ public class UserHandler implements IUserHandler {
         return UserCreatedResponseDto.builder()
                 .id(saved.getId())
                 .nombre(saved.getNombre())
+                .apellido(saved.getApellido())
                 .correo(saved.getCorreo())
+                .rol(Optional.ofNullable(saved.getRol()).map(RolModel::getNombre).orElse(null))
+                .creadoEn(Optional.ofNullable(saved.getCreadoEn()).map(Object::toString).orElse(null))
+                .build();
+    }
+
+    @Override
+    public UserCreatedResponseDto saveEmployee(EmployeeRequestDto employeeRequestDto) {
+        log.info("[HANDLER] Iniciando proceso de creación de empleado: correo={}", employeeRequestDto.getCorreo());
+
+        UserModel userModel = userRequestMapper.toUserFromEmployee(employeeRequestDto);
+        UserModel saved = userServicePort.saveEmployee(userModel);
+
+        log.info("[HANDLER] Proceso finalizado correctamente para empleado: {}", employeeRequestDto.getCorreo());
+
+        return UserCreatedResponseDto.builder()
+                .id(saved.getId())
+                .nombre(saved.getNombre())
+                .apellido(saved.getApellido())
+                .correo(saved.getCorreo())
+                .rol(Optional.ofNullable(saved.getRol()).map(RolModel::getNombre).orElse(null))
+                .creadoEn(Optional.ofNullable(saved.getCreadoEn()).map(Object::toString).orElse(null))
+                .build();
+    }
+
+    @Override
+    public UserCreatedResponseDto saveClient(ClientRequestDto clientRequestDto) {
+        log.info("[HANDLER] Iniciando proceso de creación de cliente: correo={}", clientRequestDto.getCorreo());
+
+        UserModel userModel = userRequestMapper.toUserFromClient(clientRequestDto);
+        UserModel saved = userServicePort.saveClient(userModel);
+
+        log.info("[HANDLER] Proceso finalizado correctamente para cliente: {}", clientRequestDto.getCorreo());
+
+        return UserCreatedResponseDto.builder()
+                .id(saved.getId())
+                .nombre(saved.getNombre())
+                .apellido(saved.getApellido())
+                .correo(saved.getCorreo())
+                .rol(Optional.ofNullable(saved.getRol()).map(RolModel::getNombre).orElse(null))
                 .creadoEn(Optional.ofNullable(saved.getCreadoEn()).map(Object::toString).orElse(null))
                 .build();
     }
@@ -57,7 +100,6 @@ public class UserHandler implements IUserHandler {
                 userModel.getId(), userModel.getCorreo(),
                 Optional.ofNullable(userModel.getRol()).map(r -> r.getNombre()).orElse("sin rol"));
 
-        // Uso de Builder para construir la respuesta
         return UserResponseDto.builder()
                 .id(userModel.getId())
                 .nombre(userModel.getNombre())

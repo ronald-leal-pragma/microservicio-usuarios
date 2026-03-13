@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-11T16:41:50-0500",
-    comments = "version: 1.5.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.8.jar, environment: Java 21.0.9 (Eclipse Adoptium)"
+    date = "2026-03-12T14:41:27-0500",
+    comments = "version: 1.5.2.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.8.jar, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
 public class IUserEntityMapperImpl implements IUserEntityMapper {

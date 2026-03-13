@@ -31,6 +31,10 @@ public class SecurityConfig {
             .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             // Crear propietario: público (llamado desde plazoleta o directamente)
             .antMatchers(HttpMethod.POST, "/user/").permitAll()
+            // Crear empleado: público (llamado desde microservicio-plazoleta)
+            .antMatchers(HttpMethod.POST, "/user/employee/").permitAll()
+            // Crear cliente: público (auto-registro)
+            .antMatchers(HttpMethod.POST, "/user/client/").permitAll()
             // Obtener usuario por ID: interno para integración entre microservicios
             .antMatchers(HttpMethod.GET, "/user/**").permitAll()
             .anyRequest().authenticated();

@@ -61,8 +61,7 @@ public class ControllerExceptionHandler {
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponseDto> handleUserAlreadyExistsException(
-            UserAlreadyExistsException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponseDto> handleUserAlreadyExistsException() {
         log.warn("[EXCEPTION] 409 - Usuario ya existe");
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
@@ -76,7 +75,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponseDto> handleDomainException(
-            DomainException ex, HttpServletRequest request) {
+            DomainException ex) {
         log.warn("[EXCEPTION] 400 - Validación de dominio: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -90,7 +89,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
+            MethodArgumentNotValidException ex) {
 
         String combinedMessage = ex.getBindingResult().getAllErrors().stream()
                 .map(error -> {
@@ -113,7 +112,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(
-            HttpMessageNotReadableException ex, HttpServletRequest request) {
+            HttpMessageNotReadableException ex) {
         log.warn("[EXCEPTION] 400 - JSON no legible: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -127,7 +126,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentTypeMismatchException(
-            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+            MethodArgumentTypeMismatchException ex) {
         log.warn("[EXCEPTION] 400 - Tipo de argumento inválido: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -141,7 +140,7 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
-            AccessDeniedException ex, HttpServletRequest request) {
+            AccessDeniedException ex) {
         log.warn("[EXCEPTION] 403 - Acceso denegado: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
