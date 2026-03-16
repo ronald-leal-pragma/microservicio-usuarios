@@ -90,4 +90,18 @@ public class UserRestController {
         UserResponseDto response = userHandler.getUserById(id);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "Obtener usuario por correo",
+               description = "Retorna la información básica de un usuario por su correo. Uso interno entre microservicios.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado",
+                         content = @Content(schema = @Schema(implementation = UserResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content)
+    })
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserResponseDto> getUserByEmail(@PathVariable String email) {
+        log.info("[REST] GET /user/email/{} - Buscar usuario por correo", email);
+        UserResponseDto response = userHandler.getUserByEmail(email);
+        return ResponseEntity.ok(response);
+    }
 }

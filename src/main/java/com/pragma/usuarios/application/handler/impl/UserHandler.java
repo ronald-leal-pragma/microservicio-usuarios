@@ -108,4 +108,27 @@ public class UserHandler implements IUserHandler {
                 .fechaCreacion(Optional.ofNullable(userModel.getCreadoEn()).map(Object::toString).orElse(null))
                 .build();
     }
+
+    @Override
+    public UserResponseDto getUserByEmail(String email) {
+        log.info("[HANDLER] Buscando usuario por email={}", email);
+
+        UserModel userModel = userPersistencePort.findByCorreo(email)
+                .orElseThrow(() -> {
+                    log.warn("[HANDLER] Usuario no encontrado: email={}", email);
+                    return new NoDataFoundException("No se encontró el usuario con correo " + email);
+                });
+
+        log.info("[HANDLER] Usuario encontrado: id={}, correo={}, rol={}",
+                userModel.getId(), userModel.getCorreo(),
+                Optional.ofNullable(userModel.getRol()).map(r -> r.getNombre()).orElse("sin rol"));
+
+        return UserResponseDto.builder()
+                .id(userModel.getId())
+                .nombre(userModel.getNombre())
+                .correo(userModel.getCorreo())
+                .rol(Optional.ofNullable(userModel.getRol()).map(r -> r.getNombre()).orElse(null))
+                .fechaCreacion(Optional.ofNullable(userModel.getCreadoEn()).map(Object::toString).orElse(null))
+                .build();
+    }
 }

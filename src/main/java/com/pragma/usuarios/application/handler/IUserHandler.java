@@ -11,4 +11,5 @@ public interface IUserHandler {
     UserCreatedResponseDto saveEmployee(EmployeeRequestDto employeeRequestDto);
     UserCreatedResponseDto saveClient(ClientRequestDto clientRequestDto);
     UserResponseDto getUserById(Long id);
+    UserResponseDto getUserByEmail(String email);
 }
