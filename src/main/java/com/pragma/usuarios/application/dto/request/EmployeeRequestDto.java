@@ -35,6 +35,5 @@ public class EmployeeRequestDto {
     @NotBlank(message = "La clave es obligatoria")
     private String clave;
 
-    // Campo opcional para empleados
     private LocalDate fechaNacimiento;
 }

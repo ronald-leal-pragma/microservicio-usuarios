@@ -104,7 +104,7 @@ public class UserHandler implements IUserHandler {
                 .id(userModel.getId())
                 .nombre(userModel.getNombre())
                 .correo(userModel.getCorreo())
-                .rol(Optional.ofNullable(userModel.getRol()).map(r -> r.getNombre()).orElse(null))
+                .rol(Optional.ofNullable(userModel.getRol()).map(RolModel::getNombre).orElse(null))
                 .fechaCreacion(Optional.ofNullable(userModel.getCreadoEn()).map(Object::toString).orElse(null))
                 .build();
     }
