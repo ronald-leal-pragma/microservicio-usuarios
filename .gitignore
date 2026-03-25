@@ -35,3 +35,29 @@ src/test/resources/application-local.yml
 # Keep Gradle wrapper tracked
 !gradle/wrapper/gradle-wrapper.jar
 
+# Test reports y cobertura
+*.exec
+*.ec
+*.coverage
+*.lcov
+*.hprof
+build/reports/
+build/test-results/
+
+# Archivos temporales de sistema/editor
+*.swp
+*.swo
+*~
+*.tmp
+
+# Archivos de configuración de usuario
+.vscode/
+.idea/
+*.ipr
+*.iws
+*.bak
+*.old
+
+# Archivos de bases de datos temporales
+*.db
+*.sqlite

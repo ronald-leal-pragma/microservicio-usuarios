@@ -16,4 +16,5 @@ public class UserResponseDto {
     private String rol;
     @JsonProperty("fecha_creacion")
     private String fechaCreacion;
+    private String celular;
 }
